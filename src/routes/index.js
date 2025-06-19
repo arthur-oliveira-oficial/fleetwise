@@ -2,15 +2,8 @@
 const express = require("express");
 const router = express.Router();
 
-// Importação das rotas
-const vehicleRoutes = require("./vehicles");
-const driverRoutes = require("./drivers");
-const maintenanceRoutes = require("./maintenance");
-
 // Definição das rotas
-router.use("/vehicles", vehicleRoutes);
-router.use("/drivers", driverRoutes);
-router.use("/maintenance", maintenanceRoutes);
+// As rotas específicas foram removidas
 
 // Rota de status da API
 router.get("/status", (req, res) => {
