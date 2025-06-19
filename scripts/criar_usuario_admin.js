@@ -9,7 +9,7 @@ async function criarAdmin() {
     const usuario = await Usuario.create({
       nome: "administrador",
       email: "administrador@teste.com",
-      senha_hash: "admin12345",
+      senha_hash: "senha12345",
       tipo: "admin",
       ativo: true,
       criado_em: new Date(),
