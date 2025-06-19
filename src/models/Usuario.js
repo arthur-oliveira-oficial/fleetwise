@@ -5,54 +5,62 @@ const bcrypt = require("bcryptjs");
 const Usuario = sequelize.define(
   "Usuario",
   {
-    nomeUsuario: {
-      type: DataTypes.STRING,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
       allowNull: false,
-      unique: true,
-      validate: {
-        notEmpty: true,
-      },
     },
-    senha: {
-      type: DataTypes.STRING,
+    nome: {
+      type: DataTypes.STRING(100),
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
     email: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
       validate: {
         isEmail: true,
       },
     },
-    nomeCompleto: {
-      type: DataTypes.STRING,
+    senha_hash: {
+      type: DataTypes.STRING(255),
       allowNull: false,
     },
-    funcao: {
-      type: DataTypes.ENUM("admin", "gerente", "usuario"),
-      defaultValue: "usuario",
-    },
-    estaAtivo: {
+    ativo: {
       type: DataTypes.BOOLEAN,
+      allowNull: false,
       defaultValue: true,
+    },
+    criado_em: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    atualizado_em: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    ultimo_login: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {
+    tableName: "usuarios",
+    timestamps: false,
+    underscored: true,
     hooks: {
       beforeCreate: async (usuario) => {
-        if (usuario.senha) {
+        if (usuario.senha_hash) {
           const salt = await bcrypt.genSalt(10);
-          usuario.senha = await bcrypt.hash(usuario.senha, salt);
+          usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, salt);
         }
       },
       beforeUpdate: async (usuario) => {
-        if (usuario.changed("senha")) {
+        if (usuario.changed("senha_hash")) {
           const salt = await bcrypt.genSalt(10);
-          usuario.senha = await bcrypt.hash(usuario.senha, salt);
+          usuario.senha_hash = await bcrypt.hash(usuario.senha_hash, salt);
         }
       },
     },
@@ -61,7 +69,7 @@ const Usuario = sequelize.define(
 
 // Método para verificar senha
 Usuario.prototype.verificarSenha = async function (senha) {
-  return await bcrypt.compare(senha, this.senha);
+  return await bcrypt.compare(senha, this.senha_hash);
 };
 
 module.exports = Usuario;
