@@ -4,9 +4,11 @@ const router = express.Router();
 
 // Importação das rotas
 const authRoutes = require("./auth");
+const usuarioRoutes = require("./usuario");
 
 // Definição das rotas
 router.use("/auth", authRoutes);
+router.use("/usuario", usuarioRoutes);
 
 /**
  * @openapi
