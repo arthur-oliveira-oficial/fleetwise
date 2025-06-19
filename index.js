@@ -3,6 +3,8 @@ require("dotenv").config();
 const express = require("express");
 // Importa o Sequelize e os modelos da nova estrutura
 const { sequelize, syncModels } = require("./src/models");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./src/config/swagger");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +33,9 @@ app.get("/", (req, res) => {
 // Importar e usar as rotas da aplicação
 const routes = require("./src/routes");
 app.use("/api", routes);
+
+// Rota da documentação Swagger
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Middleware para tratar erros 404
 app.use((req, res, next) => {
