@@ -1,9 +1,14 @@
 const jwt = require("jsonwebtoken");
-const { User, sequelize } = require("../../models");
+const { Usuario, sequelize } = require("../../models");
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
-const JWT_SECRET =
-  process.env.JWT_SECRET || "fleetwise_secret_key_change_in_production";
+const JWT_SECRET = process.env.JWT_SECRET;
+// Verificar se a chave secreta está definida
+if (!JWT_SECRET) {
+  console.error(
+    "AVISO: JWT_SECRET não definido no arquivo .env - use um valor seguro para ambientes de produção!"
+  );
+}
 // Tempo de expiração do token (padrão: 24 horas)
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
 
@@ -12,12 +17,10 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
  */
 exports.register = async (req, res) => {
   try {
-    const { username, email, password, fullName, role } = req.body;
-
-    // Verificar se o usuário ou email já existem
-    const existingUser = await User.findOne({
+    const { username, email, password, fullName, role } = req.body; // Verificar se o usuário ou email já existem
+    const existingUser = await Usuario.findOne({
       where: {
-        [sequelize.Op.or]: [{ username }, { email }],
+        [sequelize.Op.or]: [{ nomeUsuario: username }, { email }],
       },
     });
 
@@ -26,15 +29,13 @@ exports.register = async (req, res) => {
         success: false,
         message: "Usuário ou email já cadastrado",
       });
-    }
-
-    // Criar novo usuário
-    const newUser = await User.create({
-      username,
+    } // Criar novo usuário
+    const newUser = await Usuario.create({
+      nomeUsuario: username,
       email,
-      password, // Será criptografado pelo hook beforeCreate
-      fullName,
-      role: role || "user",
+      senha: password, // Será criptografado pelo hook beforeCreate
+      nomeCompleto: fullName,
+      funcao: role || "usuario",
     });
 
     // Remover a senha do objeto de resposta
@@ -61,11 +62,9 @@ exports.register = async (req, res) => {
  */
 exports.login = async (req, res) => {
   try {
-    const { username, password } = req.body;
-
-    // Verificar se o usuário existe
-    const user = await User.findOne({
-      where: { username },
+    const { username, password } = req.body; // Verificar se o usuário existe
+    const user = await Usuario.findOne({
+      where: { nomeUsuario: username },
     });
 
     if (!user) {
@@ -73,47 +72,40 @@ exports.login = async (req, res) => {
         success: false,
         message: "Credenciais inválidas",
       });
-    }
-
-    // Verificar se o usuário está ativo
-    if (!user.isActive) {
+    } // Verificar se o usuário está ativo
+    if (!user.estaAtivo) {
       return res.status(401).json({
         success: false,
         message: "Conta desativada. Entre em contato com o administrador.",
       });
-    }
-
-    // Verificar a senha
-    const isPasswordValid = await user.checkPassword(password);
+    } // Verificar a senha
+    const isPasswordValid = await user.verificarSenha(password);
 
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
         message: "Credenciais inválidas",
       });
-    }
-
-    // Gerar token JWT
+    } // Gerar token JWT
     const token = jwt.sign(
       {
         id: user.id,
-        username: user.username,
-        role: user.role,
+        username: user.nomeUsuario,
+        role: user.funcao,
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
-
     res.status(200).json({
       success: true,
       message: "Login realizado com sucesso",
       token,
       user: {
         id: user.id,
-        username: user.username,
+        username: user.nomeUsuario,
         email: user.email,
-        fullName: user.fullName,
-        role: user.role,
+        fullName: user.nomeCompleto,
+        role: user.funcao,
       },
     });
   } catch (error) {
@@ -132,8 +124,8 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     // req.user é definido pelo middleware de autenticação
-    const user = await User.findByPk(req.user.id, {
-      attributes: { exclude: ["password"] },
+    const user = await Usuario.findByPk(req.user.id, {
+      attributes: { exclude: ["senha"] },
     });
 
     if (!user) {

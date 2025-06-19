@@ -1,9 +1,14 @@
 const jwt = require("jsonwebtoken");
-const { User } = require("../../models");
+const { Usuario } = require("../../models");
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
-const JWT_SECRET =
-  process.env.JWT_SECRET || "fleetwise_secret_key_change_in_production";
+const JWT_SECRET = process.env.JWT_SECRET;
+// Verificar se a chave secreta está definida
+if (!JWT_SECRET) {
+  console.error(
+    "AVISO: JWT_SECRET não definido no arquivo .env - use um valor seguro para ambientes de produção!"
+  );
+}
 
 /**
  * Middleware para proteger rotas que requerem autenticação
@@ -30,20 +35,16 @@ exports.protect = async (req, res, next) => {
 
     try {
       // Verificar o token
-      const decoded = jwt.verify(token, JWT_SECRET);
-
-      // Verificar se o usuário ainda existe
-      const currentUser = await User.findByPk(decoded.id);
+      const decoded = jwt.verify(token, JWT_SECRET); // Verificar se o usuário ainda existe
+      const currentUser = await Usuario.findByPk(decoded.id);
 
       if (!currentUser) {
         return res.status(401).json({
           success: false,
           message: "O usuário associado a este token não existe mais.",
         });
-      }
-
-      // Verificar se o usuário está ativo
-      if (!currentUser.isActive) {
+      } // Verificar se o usuário está ativo
+      if (!currentUser.estaAtivo) {
         return res.status(401).json({
           success: false,
           message:
