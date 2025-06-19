@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
-const { Usuario, sequelize } = require("../../models");
+const { Usuario } = require("../../models");
+const { Op } = require("sequelize");
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -20,7 +21,7 @@ exports.register = async (req, res) => {
     const { username, email, password, fullName, role } = req.body; // Verificar se o usuário ou email já existem
     const existingUser = await Usuario.findOne({
       where: {
-        [sequelize.Op.or]: [{ nome: username }, { email }],
+        [Op.or]: [{ nome: username }, { email }],
       },
     });
 
