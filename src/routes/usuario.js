@@ -3,6 +3,7 @@ const {
   registrar,
   obterUsuarioAtual,
   atualizarSenha,
+  atualizarCadastro, // Adicionado
 } = require("../controllers/auth/authController");
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
@@ -86,5 +87,39 @@ router.get("/perfil", proteger, obterUsuarioAtual);
  *         description: Usuário não encontrado
  */
 router.put("/atualizar-senha", proteger, atualizarSenha);
+
+/**
+ * @swagger
+ * /usuario/atualizar-cadastro:
+ *   put:
+ *     summary: Atualiza informações do usuário autenticado (exceto senha)
+ *     tags: [Usuário]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               tipo:
+ *                 type: string
+ *                 description: "Tipo do usuário (ex: 'admin', 'usuario')"
+ *     responses:
+ *       200:
+ *         description: Cadastro atualizado com sucesso
+ *       400:
+ *         description: Dados inválidos
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put("/atualizar-cadastro", proteger, atualizarCadastro);
 
 module.exports = router;

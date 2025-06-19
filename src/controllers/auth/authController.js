@@ -194,3 +194,44 @@ exports.atualizarSenha = async (req, res) => {
       .json({ sucesso: false, mensagem: "Erro ao atualizar senha" });
   }
 };
+
+/**
+ * Atualizar informações do usuário autenticado
+ * Permite atualizar nome, email e tipo (exceto senha)
+ */
+exports.atualizarCadastro = async (req, res) => {
+  try {
+    const { nome, email, tipo } = req.body;
+    const usuario = await require("../../models/Usuario").findByPk(req.user.id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Usuário não encontrado",
+      });
+    }
+
+    // Atualiza apenas os campos permitidos
+    if (nome) usuario.nome = nome;
+    if (email) usuario.email = email;
+    if (tipo) usuario.tipo = tipo;
+    usuario.atualizado_em = new Date();
+
+    await usuario.save();
+
+    const { senha_hash, ...usuarioSemSenha } = usuario.toJSON();
+
+    res.json({
+      sucesso: true,
+      mensagem: "Cadastro atualizado com sucesso",
+      usuario: usuarioSemSenha,
+    });
+  } catch (erro) {
+    console.error("Erro ao atualizar cadastro:", erro);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao atualizar cadastro",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
+    });
+  }
+};
