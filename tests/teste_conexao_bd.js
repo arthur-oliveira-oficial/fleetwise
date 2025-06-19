@@ -1,8 +1,16 @@
-// Script para testar a conexão com o banco de dados
+// teste_conexao_bd.js
+// Script para testar a conexão com o banco de dados usando Sequelize
+// Autor: [Seu Nome]
+// Data: [Data de criação]
+// Este script realiza um teste de conexão com o banco de dados configurado no projeto.
+// Ele autentica a conexão, executa uma consulta simples e fecha a conexão ao final.
+
 require("dotenv").config();
 const sequelize = require("../src/config/database");
 
+// Função principal para testar a conexão com o banco de dados
 async function testDatabaseConnection() {
+  // Exibe informações de configuração
   console.log("Testando conexão com o banco de dados...");
   console.log("Configurações:");
   console.log(`- Host: ${process.env.DB_HOST || "localhost"}`);
@@ -15,7 +23,7 @@ async function testDatabaseConnection() {
     await sequelize.authenticate();
     console.log("✅ Conexão estabelecida com sucesso!");
 
-    // Verifica se o banco de dados está respondendo com uma consulta simples
+    // Executa uma consulta simples para verificar resposta do banco
     const [results] = await sequelize.query("SELECT 1+1 AS resultado");
     console.log(
       "✅ Consulta de teste executada com sucesso: ",
@@ -24,6 +32,7 @@ async function testDatabaseConnection() {
 
     return true;
   } catch (error) {
+    // Em caso de erro, exibe mensagem detalhada
     console.error(
       "❌ Não foi possível conectar ao banco de dados:",
       error.message
@@ -53,4 +62,5 @@ if (require.main === module) {
     });
 }
 
+// Exporta a função para uso externo
 module.exports = { testDatabaseConnection };

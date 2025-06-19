@@ -1,15 +1,23 @@
 // Arquivo principal da aplicação
+// Carrega variáveis de ambiente do arquivo .env
 require("dotenv").config();
+
+// Importa o framework Express
 const express = require("express");
-// Importa o Sequelize e os modelos da nova estrutura
+
+// Importa o Sequelize e função para sincronizar modelos
 const { sequelize, syncModels } = require("./src/models");
+
+// Importa o Swagger UI e a especificação Swagger
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./src/config/swagger");
 
+// Inicializa a aplicação Express
 const app = express();
+// Define a porta do servidor (padrão 3000 se não houver variável de ambiente)
 const PORT = process.env.PORT || 3000;
 
-// Middleware para parsing de JSON
+// Middleware para parsing de JSON e dados de formulários
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -25,19 +33,19 @@ sequelize
     console.error("Erro ao conectar ao banco de dados:", err);
   });
 
-// Rotas da aplicação
+// Rota principal para teste rápido da API
 app.get("/", (req, res) => {
   res.send("FleetWise API está funcionando!");
 });
 
-// Importar e usar as rotas da aplicação
+// Importa e usa as rotas da aplicação (pasta src/routes)
 const routes = require("./src/routes");
 app.use("/api", routes);
 
-// Rota da documentação Swagger
+// Rota para documentação Swagger
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Middleware para tratar erros 404
+// Middleware para tratar erros 404 (endpoint não encontrado)
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -45,7 +53,7 @@ app.use((req, res, next) => {
   });
 });
 
-// Middleware para tratar erros gerais
+// Middleware para tratar erros gerais da aplicação
 app.use((err, req, res, next) => {
   console.error("Erro na aplicação:", err);
   const statusCode = err.statusCode || 500;
@@ -56,7 +64,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Inicialização do servidor
+// Inicialização do servidor Express
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

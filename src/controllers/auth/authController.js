@@ -1,3 +1,4 @@
+// Controlador de autenticação: lida com registro, login e obtenção de informações do usuário
 const jwt = require("jsonwebtoken");
 const { Usuario } = require("../../models");
 const { Op } = require("sequelize");
@@ -15,6 +16,8 @@ const JWT_TEMPO_EXPIRACAO = process.env.JWT_EXPIRES_IN || "24h";
 
 /**
  * Registrar um novo usuário
+ * Recebe os dados do usuário, verifica se já existe e cria um novo registro.
+ * Remove a senha do objeto de resposta por segurança.
  */
 exports.registrar = async (req, res) => {
   try {
@@ -60,6 +63,7 @@ exports.registrar = async (req, res) => {
 
 /**
  * Login de usuário
+ * Verifica email e senha, gera token JWT e retorna dados do usuário (sem senha).
  */
 exports.login = async (req, res) => {
   const bcrypt = require("bcrypt");
@@ -75,12 +79,14 @@ exports.login = async (req, res) => {
         .json({ mensagem: "Email e senha são obrigatórios." });
     }
 
+    // Busca usuário ativo pelo email
     const usuario = await Usuario.findOne({ where: { email, ativo: true } });
 
     if (!usuario) {
       return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
     }
 
+    // Compara senha informada com hash armazenado
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (!senhaValida) {
@@ -89,12 +95,14 @@ exports.login = async (req, res) => {
     usuario.ultimo_login = new Date();
     await usuario.save();
 
+    // Monta payload do token
     const payload = {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
     };
 
+    // Gera token JWT
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRES_IN,
     });
@@ -114,6 +122,7 @@ exports.login = async (req, res) => {
 
 /**
  * Obter informações do usuário atual
+ * Busca o usuário autenticado pelo ID (definido no middleware) e retorna seus dados (sem senha).
  */
 exports.obterUsuarioAtual = async (req, res) => {
   try {
