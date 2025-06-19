@@ -8,6 +8,32 @@ const authRoutes = require("./auth");
 // Definição das rotas
 router.use("/auth", authRoutes);
 
+/**
+ * @openapi
+ * /status:
+ *   get:
+ *     summary: Verifica o status da API
+ *     tags:
+ *       - Status
+ *     responses:
+ *       200:
+ *         description: Retorna o status online, timestamp e ambiente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: online
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                   example: '2025-06-19T12:34:56.789Z'
+ *                 environment:
+ *                   type: string
+ *                   example: development
+ */
 // Rota de status da API
 router.get("/status", (req, res) => {
   res.json({
