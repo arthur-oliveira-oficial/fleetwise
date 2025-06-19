@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { Usuario } = require("../../models");
+const Usuario = require("../../models/usuario"); // Atualizado para importar o novo model
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -35,7 +35,8 @@ exports.protect = async (req, res, next) => {
 
     try {
       // Verificar o token
-      const decoded = jwt.verify(token, JWT_SECRET); // Verificar se o usuário ainda existe
+      const decoded = jwt.verify(token, JWT_SECRET);
+      // Buscar usuário pelo novo model e campo correto
       const currentUser = await Usuario.findByPk(decoded.id);
 
       if (!currentUser) {
@@ -43,8 +44,9 @@ exports.protect = async (req, res, next) => {
           success: false,
           message: "O usuário associado a este token não existe mais.",
         });
-      } // Verificar se o usuário está ativo
-      if (!currentUser.estaAtivo) {
+      }
+      // Verificar se o usuário está ativo
+      if (!currentUser.ativo) {
         return res.status(401).json({
           success: false,
           message:
@@ -52,7 +54,7 @@ exports.protect = async (req, res, next) => {
         });
       }
 
-      // Adicionar o usuário à requisição para uso em controladores posteriores
+      // Adicionar os dados decodificados do token à requisição
       req.user = decoded;
       next();
     } catch (error) {
