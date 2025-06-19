@@ -2,8 +2,11 @@
 const express = require("express");
 const router = express.Router();
 
+// Importação das rotas
+const authRoutes = require("./auth");
+
 // Definição das rotas
-// As rotas específicas foram removidas
+router.use("/auth", authRoutes);
 
 // Rota de status da API
 router.get("/status", (req, res) => {
