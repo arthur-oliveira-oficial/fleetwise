@@ -153,55 +153,12 @@ exports.obterUsuarioAtual = async (req, res) => {
 };
 
 /**
- * Atualizar senha do usuário autenticado
- * Requer senha atual e nova senha.
- */
-exports.atualizarSenha = async (req, res) => {
-  try {
-    const { senhaAtual, novaSenha } = req.body;
-    if (!senhaAtual || !novaSenha) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Informe a senha atual e a nova senha.",
-      });
-    }
-    const usuario = await require("../../models/Usuario").findByPk(req.user.id);
-
-    if (!usuario) {
-      return res
-        .status(404)
-        .json({ sucesso: false, mensagem: "Usuário não encontrado" });
-    }
-
-    // Verifica se a senha atual está correta
-    const senhaCorreta = await usuario.verificarSenha(senhaAtual);
-    if (!senhaCorreta) {
-      return res
-        .status(400)
-        .json({ sucesso: false, mensagem: "Senha atual incorreta" });
-    }
-
-    // Atualiza a senha (o hook beforeUpdate irá gerar o hash)
-    usuario.senha_hash = novaSenha;
-    usuario.atualizado_em = new Date();
-    await usuario.save();
-
-    res.json({ sucesso: true, mensagem: "Senha atualizada com sucesso" });
-  } catch (erro) {
-    console.error("Erro ao atualizar senha:", erro);
-    res
-      .status(500)
-      .json({ sucesso: false, mensagem: "Erro ao atualizar senha" });
-  }
-};
-
-/**
- * Atualizar informações do usuário autenticado
- * Permite atualizar nome, email e tipo (exceto senha)
+ * Atualizar informações do usuário autenticado (nome, email, tipo e/ou senha)
+ * Se senhaAtual e novaSenha forem enviados, atualiza a senha também.
  */
 exports.atualizarCadastro = async (req, res) => {
   try {
-    const { nome, email, tipo } = req.body;
+    const { nome, email, tipo, senhaAtual, novaSenha } = req.body;
     const usuario = await require("../../models/Usuario").findByPk(req.user.id);
 
     if (!usuario) {
@@ -215,8 +172,25 @@ exports.atualizarCadastro = async (req, res) => {
     if (nome) usuario.nome = nome;
     if (email) usuario.email = email;
     if (tipo) usuario.tipo = tipo;
-    usuario.atualizado_em = new Date();
 
+    // Atualização de senha, se solicitado
+    if (senhaAtual || novaSenha) {
+      if (!senhaAtual || !novaSenha) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem: "Para alterar a senha, envie senhaAtual e novaSenha.",
+        });
+      }
+      const senhaCorreta = await usuario.verificarSenha(senhaAtual);
+      if (!senhaCorreta) {
+        return res
+          .status(400)
+          .json({ sucesso: false, mensagem: "Senha atual incorreta" });
+      }
+      usuario.senha_hash = novaSenha;
+    }
+
+    usuario.atualizado_em = new Date();
     await usuario.save();
 
     const { senha_hash, ...usuarioSemSenha } = usuario.toJSON();

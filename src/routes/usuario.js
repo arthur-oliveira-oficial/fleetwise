@@ -2,8 +2,7 @@ const express = require("express");
 const {
   registrar,
   obterUsuarioAtual,
-  atualizarSenha,
-  atualizarCadastro, // Adicionado
+  atualizarCadastro, // Mantido apenas este para unificar a atualização
 } = require("../controllers/auth/authController");
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
@@ -57,42 +56,9 @@ router.get("/perfil", proteger, obterUsuarioAtual);
 
 /**
  * @swagger
- * /usuario/atualizar-senha:
+ * /usuario/atualizar:
  *   put:
- *     summary: Atualiza a senha do usuário autenticado
- *     tags: [Usuário]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               senhaAtual:
- *                 type: string
- *                 description: Senha atual do usuário
- *               novaSenha:
- *                 type: string
- *                 description: Nova senha desejada
- *     responses:
- *       200:
- *         description: Senha atualizada com sucesso
- *       400:
- *         description: Senha atual incorreta ou dados inválidos
- *       401:
- *         description: Token de autenticação ausente ou inválido
- *       404:
- *         description: Usuário não encontrado
- */
-router.put("/atualizar-senha", proteger, atualizarSenha);
-
-/**
- * @swagger
- * /usuario/atualizar-cadastro:
- *   put:
- *     summary: Atualiza informações do usuário autenticado (exceto senha)
+ *     summary: Atualiza informações do usuário autenticado (nome, email, tipo e/ou senha)
  *     tags: [Usuário]
  *     security:
  *       - bearerAuth: []
@@ -110,16 +76,22 @@ router.put("/atualizar-senha", proteger, atualizarSenha);
  *               tipo:
  *                 type: string
  *                 description: "Tipo do usuário (ex: 'admin', 'usuario')"
+ *               senhaAtual:
+ *                 type: string
+ *                 description: Senha atual do usuário (obrigatória para alteração de senha)
+ *               novaSenha:
+ *                 type: string
+ *                 description: Nova senha desejada
  *     responses:
  *       200:
  *         description: Cadastro atualizado com sucesso
  *       400:
- *         description: Dados inválidos
+ *         description: Dados inválidos ou senha atual incorreta
  *       401:
  *         description: Token de autenticação ausente ou inválido
  *       404:
  *         description: Usuário não encontrado
  */
-router.put("/atualizar-cadastro", proteger, atualizarCadastro);
+router.put("/atualizar", proteger, atualizarCadastro);
 
 module.exports = router;
