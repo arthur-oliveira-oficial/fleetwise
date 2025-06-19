@@ -25,6 +25,10 @@ app.get("/", (req, res) => {
   res.send("FleetWise API está funcionando!");
 });
 
+// Importar e usar as rotas da aplicação
+const routes = require("./src/routes");
+app.use("/api", routes);
+
 // Inicialização do servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

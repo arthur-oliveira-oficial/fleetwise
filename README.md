@@ -10,6 +10,8 @@ fleetwise/
 ├── .env.example           # Modelo para variáveis de ambiente
 ├── index.js               # Ponto de entrada da aplicação
 ├── package.json           # Dependências e scripts
+├── tests/                 # Testes da aplicação
+│   └── db-connection-test.js # Teste de conexão com o banco de dados
 ├── src/                   # Código fonte da aplicação
 │   ├── config/            # Configurações (banco de dados, etc.)
 │   │   └── database.js    # Configuração do Sequelize
@@ -37,3 +39,4 @@ fleetwise/
 
 - `npm start`: Inicia o servidor
 - `npm run dev`: Inicia o servidor com nodemon para desenvolvimento
+- `npm run test:db`: Testa a conexão com o banco de dados
