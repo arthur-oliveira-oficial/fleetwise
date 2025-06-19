@@ -10,10 +10,10 @@ async function criarAdmin() {
       nome: "administrador",
       email: "administrador@teste.com",
       senha_hash: "admin12345",
+      tipo: "admin",
       ativo: true,
       criado_em: new Date(),
       atualizado_em: new Date(),
-      // tipo: "administrador" // descomente se o campo existir no modelo
     });
     console.log("Usuário administrador criado com sucesso:", usuario.toJSON());
   } catch (error) {

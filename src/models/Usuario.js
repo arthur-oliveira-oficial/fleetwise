@@ -27,6 +27,14 @@ const Usuario = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: false,
     },
+    tipo: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "usuario",
+      validate: {
+        isIn: [["admin", "usuario"]],
+      },
+    },
     ativo: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
