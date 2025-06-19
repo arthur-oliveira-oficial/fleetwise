@@ -3,63 +3,63 @@ const { Usuario } = require("../../models");
 const { Op } = require("sequelize");
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
-const JWT_SECRET = process.env.JWT_SECRET;
+const SEGREDO_JWT = process.env.JWT_SECRET;
 // Verificar se a chave secreta está definida
-if (!JWT_SECRET) {
+if (!SEGREDO_JWT) {
   console.error(
-    "AVISO: JWT_SECRET não definido no arquivo .env - use um valor seguro para ambientes de produção!"
+    "AVISO: SEGREDO_JWT não definido no arquivo .env - use um valor seguro para ambientes de produção!"
   );
 }
 // Tempo de expiração do token (padrão: 24 horas)
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || "24h";
+const JWT_TEMPO_EXPIRACAO = process.env.JWT_EXPIRES_IN || "24h";
 
 /**
  * Registrar um novo usuário
  */
-exports.register = async (req, res) => {
+exports.registrar = async (req, res) => {
   try {
-    const { username, email, password, fullName, role } = req.body; // Verificar se o usuário ou email já existem
-    const existingUser = await Usuario.findOne({
+    const { nomeUsuario, email, senha, nomeCompleto, funcao } = req.body; // Verificar se o usuário ou email já existem
+    const usuarioExistente = await Usuario.findOne({
       where: {
-        [Op.or]: [{ nome: username }, { email }],
+        [Op.or]: [{ nome: nomeUsuario }, { email }],
       },
     });
 
-    if (existingUser) {
+    if (usuarioExistente) {
       return res.status(400).json({
-        success: false,
-        message: "Usuário ou email já cadastrado",
+        sucesso: false,
+        mensagem: "Usuário ou email já cadastrado",
       });
     } // Criar novo usuário
-    const newUser = await Usuario.create({
-      nome: username,
+    const novoUsuario = await Usuario.create({
+      nome: nomeUsuario,
       email,
-      senha_hash: password, // Será criptografado pelo hook beforeCreate
-      nomeCompleto: fullName,
-      funcao: role || "usuario",
+      senha_hash: senha, // Será criptografado pelo hook beforeCreate
+      nomeCompleto,
+      funcao: funcao || "usuario",
     });
 
     // Remover a senha do objeto de resposta
-    const userResponse = newUser.toJSON();
-    delete userResponse.password;
+    const respostaUsuario = novoUsuario.toJSON();
+    delete respostaUsuario.senha;
 
     res.status(201).json({
-      success: true,
-      message: "Usuário registrado com sucesso",
-      user: userResponse,
+      sucesso: true,
+      mensagem: "Usuário registrado com sucesso",
+      usuario: respostaUsuario,
     });
-  } catch (error) {
-    console.error("Erro ao registrar usuário:", error);
+  } catch (erro) {
+    console.error("Erro ao registrar usuário:", erro);
     res.status(500).json({
-      success: false,
-      message: "Erro ao registrar usuário",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      sucesso: false,
+      mensagem: "Erro ao registrar usuário",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };
 
 /**
- * Login de usuário (refatorado para novo model)
+ * Login de usuário
  */
 exports.login = async (req, res) => {
   const bcrypt = require("bcrypt");
@@ -106,8 +106,8 @@ exports.login = async (req, res) => {
       usuario: usuarioSemSenha,
       token,
     });
-  } catch (error) {
-    console.error("Erro no login:", error);
+  } catch (erro) {
+    console.error("Erro no login:", erro);
     return res.status(500).json({ mensagem: "Erro interno no servidor." });
   }
 };
@@ -115,30 +115,30 @@ exports.login = async (req, res) => {
 /**
  * Obter informações do usuário atual
  */
-exports.getMe = async (req, res) => {
+exports.obterUsuarioAtual = async (req, res) => {
   try {
     // req.user é definido pelo middleware de autenticação
-    const user = await Usuario.findByPk(req.user.id, {
+    const usuario = await Usuario.findByPk(req.user.id, {
       attributes: { exclude: ["senha"] },
     });
 
-    if (!user) {
+    if (!usuario) {
       return res.status(404).json({
-        success: false,
-        message: "Usuário não encontrado",
+        sucesso: false,
+        mensagem: "Usuário não encontrado",
       });
     }
 
     res.status(200).json({
-      success: true,
-      user,
+      sucesso: true,
+      usuario,
     });
-  } catch (error) {
-    console.error("Erro ao obter informações do usuário:", error);
+  } catch (erro) {
+    console.error("Erro ao obter informações do usuário:", erro);
     res.status(500).json({
-      success: false,
-      message: "Erro no servidor",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      sucesso: false,
+      mensagem: "Erro no servidor",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };

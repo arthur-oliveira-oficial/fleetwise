@@ -1,19 +1,19 @@
 const jwt = require("jsonwebtoken");
-const Usuario = require("../../models/usuario"); // Atualizado para importar o novo model
+const Usuario = require("../../models/Usuario"); // Corrigido para manter padrão
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
-const JWT_SECRET = process.env.JWT_SECRET;
+const SEGREDO_JWT = process.env.JWT_SECRET;
 // Verificar se a chave secreta está definida
-if (!JWT_SECRET) {
+if (!SEGREDO_JWT) {
   console.error(
-    "AVISO: JWT_SECRET não definido no arquivo .env - use um valor seguro para ambientes de produção!"
+    "AVISO: SEGREDO_JWT não definido no arquivo .env - use um valor seguro para ambientes de produção!"
   );
 }
 
 /**
  * Middleware para proteger rotas que requerem autenticação
  */
-exports.protect = async (req, res, next) => {
+exports.proteger = async (req, res, next) => {
   try {
     let token;
 
@@ -28,49 +28,48 @@ exports.protect = async (req, res, next) => {
     // Verificar se o token existe
     if (!token) {
       return res.status(401).json({
-        success: false,
-        message: "Acesso não autorizado. Faça login para continuar.",
+        sucesso: false,
+        mensagem: "Acesso não autorizado. Faça login para continuar.",
       });
     }
 
     try {
       // Verificar o token
-      const decoded = jwt.verify(token, JWT_SECRET);
+      const decodificado = jwt.verify(token, SEGREDO_JWT);
       // Buscar usuário pelo novo model e campo correto
-      const currentUser = await Usuario.findByPk(decoded.id);
+      const usuarioAtual = await Usuario.findByPk(decodificado.id);
 
-      if (!currentUser) {
+      if (!usuarioAtual) {
         return res.status(401).json({
-          success: false,
-          message: "O usuário associado a este token não existe mais.",
+          sucesso: false,
+          mensagem: "O usuário associado a este token não existe mais.",
         });
       }
       // Verificar se o usuário está ativo
-      if (!currentUser.ativo) {
+      if (!usuarioAtual.ativo) {
         return res.status(401).json({
-          success: false,
-          message:
+          sucesso: false,
+          mensagem:
             "Esta conta foi desativada. Entre em contato com o administrador.",
         });
       }
 
       // Adicionar os dados decodificados do token à requisição
-      req.user = decoded;
+      req.user = decodificado;
       next();
-    } catch (error) {
+    } catch (erro) {
       return res.status(401).json({
-        success: false,
-        message: "Token inválido ou expirado. Faça login novamente.",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
+        sucesso: false,
+        mensagem: "Token inválido ou expirado. Faça login novamente.",
+        erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
       });
     }
-  } catch (error) {
-    console.error("Erro no middleware de autenticação:", error);
+  } catch (erro) {
+    console.error("Erro no middleware de autenticação:", erro);
     res.status(500).json({
-      success: false,
-      message: "Erro no servidor",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+      sucesso: false,
+      mensagem: "Erro no servidor",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };
@@ -78,12 +77,12 @@ exports.protect = async (req, res, next) => {
 /**
  * Middleware para restringir acesso com base nas funções do usuário
  */
-exports.authorize = (...roles) => {
+exports.autorizar = (...funcoes) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!funcoes.includes(req.user.funcao)) {
       return res.status(403).json({
-        success: false,
-        message: "Você não tem permissão para acessar este recurso",
+        sucesso: false,
+        mensagem: "Você não tem permissão para acessar este recurso",
       });
     }
     next();
