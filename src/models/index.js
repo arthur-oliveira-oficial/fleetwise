@@ -1,7 +1,7 @@
 const sequelize = require("../config/database");
 
 // Importação de modelos
-const User = require("./User");
+const Usuario = require("./Usuario");
 
 // Definir relações entre modelos
 // Adicione novas relações conforme necessário
@@ -19,6 +19,6 @@ const syncModels = async () => {
 // Módulo de inicialização dos modelos
 module.exports = {
   sequelize,
-  User,
+  Usuario,
   syncModels,
 };

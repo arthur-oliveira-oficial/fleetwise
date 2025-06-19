@@ -2,10 +2,10 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const bcrypt = require("bcryptjs");
 
-const User = sequelize.define(
+const Usuario = sequelize.define(
   "User",
   {
-    username: {
+    nomeUsuario: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
@@ -13,7 +13,7 @@ const User = sequelize.define(
         notEmpty: true,
       },
     },
-    password: {
+    senha: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {
@@ -28,31 +28,31 @@ const User = sequelize.define(
         isEmail: true,
       },
     },
-    fullName: {
+    nomeCompleto: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    role: {
-      type: DataTypes.ENUM("admin", "manager", "user"),
-      defaultValue: "user",
+    funcao: {
+      type: DataTypes.ENUM("admin", "gerente", "usuario"),
+      defaultValue: "usuario",
     },
-    isActive: {
+    estaAtivo: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
     },
   },
   {
     hooks: {
-      beforeCreate: async (user) => {
-        if (user.password) {
+      beforeCreate: async (usuario) => {
+        if (usuario.senha) {
           const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(user.password, salt);
+          usuario.senha = await bcrypt.hash(usuario.senha, salt);
         }
       },
-      beforeUpdate: async (user) => {
-        if (user.changed("password")) {
+      beforeUpdate: async (usuario) => {
+        if (usuario.changed("senha")) {
           const salt = await bcrypt.genSalt(10);
-          user.password = await bcrypt.hash(user.password, salt);
+          usuario.senha = await bcrypt.hash(usuario.senha, salt);
         }
       },
     },
@@ -60,8 +60,8 @@ const User = sequelize.define(
 );
 
 // Método para verificar senha
-User.prototype.checkPassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
+Usuario.prototype.verificarSenha = async function (senha) {
+  return await bcrypt.compare(senha, this.senha);
 };
 
-module.exports = User;
+module.exports = Usuario;
