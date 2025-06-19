@@ -209,3 +209,36 @@ exports.atualizarCadastro = async (req, res) => {
     });
   }
 };
+
+/**
+ * Excluir (desativar) o usuário autenticado (soft delete)
+ */
+exports.excluirUsuario = async (req, res) => {
+  try {
+    const usuario = await require("../../models/Usuario").findByPk(req.user.id);
+
+    if (!usuario) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Usuário não encontrado",
+      });
+    }
+
+    // Soft delete: marca como inativo
+    usuario.ativo = false;
+    usuario.atualizado_em = new Date();
+    await usuario.save();
+
+    res.json({
+      sucesso: true,
+      mensagem: "Usuário excluído com sucesso",
+    });
+  } catch (erro) {
+    console.error("Erro ao excluir usuário:", erro);
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao excluir usuário",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
+    });
+  }
+};

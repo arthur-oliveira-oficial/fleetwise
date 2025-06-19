@@ -3,6 +3,7 @@ const {
   registrar,
   obterUsuarioAtual,
   atualizarCadastro, // Mantido apenas este para unificar a atualização
+  excluirUsuario, // Adicionado para exclusão
 } = require("../controllers/auth/authController");
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
@@ -93,5 +94,23 @@ router.get("/perfil", proteger, obterUsuarioAtual);
  *         description: Usuário não encontrado
  */
 router.put("/atualizar", proteger, atualizarCadastro);
+
+/**
+ * @swagger
+ * /usuario/excluir:
+ *   delete:
+ *     summary: Exclui (desativa) o usuário autenticado
+ *     tags: [Usuário]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Usuário excluído com sucesso
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.delete("/excluir", proteger, excluirUsuario);
 
 module.exports = router;
