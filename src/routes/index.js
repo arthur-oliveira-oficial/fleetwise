@@ -7,7 +7,7 @@ const authRoutes = require("./auth");
 const usuarioRoutes = require("./usuario");
 
 // Definição das rotas
-router.use("/auth", authRoutes);
+router.use("/", authRoutes); // Alterado de "/auth" para "/" para que o login fique em /login
 router.use("/usuario", usuarioRoutes);
 
 /**
