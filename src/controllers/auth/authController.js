@@ -58,63 +58,56 @@ exports.register = async (req, res) => {
 };
 
 /**
- * Login de usuário
+ * Login de usuário (refatorado para novo model)
  */
 exports.login = async (req, res) => {
+  const bcrypt = require("bcrypt");
+  const jwt = require("jsonwebtoken");
+  const Usuario = require("../../models/Usuario");
+
   try {
-    const { username, password } = req.body; // Verificar se o usuário existe
-    const user = await Usuario.findOne({
-      where: { nomeUsuario: username },
+    const { email, senha } = req.body;
+
+    if (!email || !senha) {
+      return res
+        .status(400)
+        .json({ mensagem: "Email e senha são obrigatórios." });
+    }
+
+    const usuario = await Usuario.findOne({ where: { email, ativo: true } });
+
+    if (!usuario) {
+      return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
+    }
+
+    const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
+
+    if (!senhaValida) {
+      return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
+    } // Atualiza o campo ultimo_login
+    usuario.ultimo_login = new Date();
+    await usuario.save();
+
+    const payload = {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+    };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: process.env.JWT_EXPIRES_IN,
     });
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Credenciais inválidas",
-      });
-    } // Verificar se o usuário está ativo
-    if (!user.estaAtivo) {
-      return res.status(401).json({
-        success: false,
-        message: "Conta desativada. Entre em contato com o administrador.",
-      });
-    } // Verificar a senha
-    const isPasswordValid = await user.verificarSenha(password);
+    // Remove o campo senha_hash do retorno
+    const { senha_hash, ...usuarioSemSenha } = usuario.toJSON();
 
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Credenciais inválidas",
-      });
-    } // Gerar token JWT
-    const token = jwt.sign(
-      {
-        id: user.id,
-        username: user.nomeUsuario,
-        role: user.funcao,
-      },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
-    res.status(200).json({
-      success: true,
-      message: "Login realizado com sucesso",
+    return res.json({
+      usuario: usuarioSemSenha,
       token,
-      user: {
-        id: user.id,
-        username: user.nomeUsuario,
-        email: user.email,
-        fullName: user.nomeCompleto,
-        role: user.funcao,
-      },
     });
   } catch (error) {
-    console.error("Erro ao fazer login:", error);
-    res.status(500).json({
-      success: false,
-      message: "Erro no servidor",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
+    console.error("Erro no login:", error);
+    return res.status(500).json({ mensagem: "Erro interno no servidor." });
   }
 };
 
