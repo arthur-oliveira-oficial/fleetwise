@@ -3,6 +3,7 @@ const {
   registrar,
   login,
   obterUsuarioAtual,
+  atualizarSenha,
 } = require("../controllers/auth/authController");
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
@@ -82,5 +83,38 @@ router.post("/login", login); // Mantido
 
 // Rotas protegidas
 router.get("/perfil", proteger, obterUsuarioAtual); // Novo nome para /me
+
+/**
+ * @swagger
+ * /auth/atualizar-senha:
+ *   put:
+ *     summary: Atualiza a senha do usuário autenticado
+ *     tags: [Autenticação]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               senhaAtual:
+ *                 type: string
+ *                 description: Senha atual do usuário
+ *               novaSenha:
+ *                 type: string
+ *                 description: Nova senha desejada
+ *     responses:
+ *       200:
+ *         description: Senha atualizada com sucesso
+ *       400:
+ *         description: Senha atual incorreta ou dados inválidos
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.put("/atualizar-senha", proteger, atualizarSenha);
 
 module.exports = router;
