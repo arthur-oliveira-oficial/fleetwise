@@ -20,7 +20,7 @@ exports.register = async (req, res) => {
     const { username, email, password, fullName, role } = req.body; // Verificar se o usuário ou email já existem
     const existingUser = await Usuario.findOne({
       where: {
-        [sequelize.Op.or]: [{ nomeUsuario: username }, { email }],
+        [sequelize.Op.or]: [{ nome: username }, { email }],
       },
     });
 
@@ -31,9 +31,9 @@ exports.register = async (req, res) => {
       });
     } // Criar novo usuário
     const newUser = await Usuario.create({
-      nomeUsuario: username,
+      nome: username,
       email,
-      senha: password, // Será criptografado pelo hook beforeCreate
+      senha_hash: password, // Será criptografado pelo hook beforeCreate
       nomeCompleto: fullName,
       funcao: role || "usuario",
     });
