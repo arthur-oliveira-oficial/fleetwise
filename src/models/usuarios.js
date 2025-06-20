@@ -3,9 +3,9 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const bcrypt = require("bcryptjs");
 
-// Definição do modelo Usuario
-const Usuario = sequelize.define(
-  "Usuario",
+// Definição do modelo usuarios
+const usuarios = sequelize.define(
+  "usuarios", // nome do modelo padronizado
   {
     // Chave primária auto-incrementada
     id: {
@@ -89,9 +89,9 @@ const Usuario = sequelize.define(
 );
 
 // Método de instância para verificar se a senha informada confere com o hash
-Usuario.prototype.verificarSenha = async function (senha) {
+usuarios.prototype.verificarSenha = async function (senha) {
   return await bcrypt.compare(senha, this.senha_hash);
 };
 
-// Exporta o modelo Usuario
-module.exports = Usuario;
+// Exporta o modelo usuarios
+module.exports = usuarios;

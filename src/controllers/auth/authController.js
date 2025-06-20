@@ -1,6 +1,6 @@
 // Controlador de autenticação: lida com registro, login e obtenção de informações do usuário
 const jwt = require("jsonwebtoken");
-const { Usuario } = require("../../models");
+const { usuarios } = require("../../models");
 const { Op } = require("sequelize");
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
@@ -22,7 +22,7 @@ const JWT_TEMPO_EXPIRACAO = process.env.JWT_EXPIRES_IN || "24h";
 exports.registrar = async (req, res) => {
   try {
     const { nomeUsuario, email, senha, nomeCompleto, funcao } = req.body; // Verificar se o usuário ou email já existem
-    const usuarioExistente = await Usuario.findOne({
+    const usuarioExistente = await usuarios.findOne({
       where: {
         [Op.or]: [{ nome: nomeUsuario }, { email }],
       },
@@ -34,7 +34,7 @@ exports.registrar = async (req, res) => {
         mensagem: "Usuário ou email já cadastrado",
       });
     } // Criar novo usuário
-    const novoUsuario = await Usuario.create({
+    const novoUsuario = await usuarios.create({
       nome: nomeUsuario,
       email,
       senha_hash: senha, // Será criptografado pelo hook beforeCreate
@@ -68,7 +68,7 @@ exports.registrar = async (req, res) => {
 exports.login = async (req, res) => {
   const bcrypt = require("bcrypt");
   const jwt = require("jsonwebtoken");
-  const Usuario = require("../../models/Usuario");
+  const usuarios = require("../../models/usuarios");
 
   try {
     const { email, senha } = req.body;
@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
     }
 
     // Busca usuário ativo pelo email
-    const usuario = await Usuario.findOne({ where: { email, ativo: true } });
+    const usuario = await usuarios.findOne({ where: { email, ativo: true } });
 
     if (!usuario) {
       return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
@@ -127,7 +127,7 @@ exports.login = async (req, res) => {
 exports.obterUsuarioAtual = async (req, res) => {
   try {
     // req.user é definido pelo middleware de autenticação
-    const usuario = await Usuario.findByPk(req.user.id, {
+    const usuario = await usuarios.findByPk(req.user.id, {
       attributes: { exclude: ["senha"] },
     });
 

@@ -2,7 +2,7 @@
 // Importa o pacote jsonwebtoken para manipulação de tokens JWT
 const jwt = require("jsonwebtoken");
 // Importa o model de Usuário
-const Usuario = require("../../models/Usuario"); // Corrigido para manter padrão
+const { usuarios } = require("../../models"); // Corrigido para novo nome e caminho
 
 // Variável de ambiente para o segredo do JWT ou um valor padrão
 const SEGREDO_JWT = process.env.JWT_SECRET;
@@ -44,7 +44,7 @@ exports.proteger = async (req, res, next) => {
       // Verificar o token
       const decodificado = jwt.verify(token, SEGREDO_JWT);
       // Buscar usuário pelo novo model e campo correto
-      const usuarioAtual = await Usuario.findByPk(decodificado.id);
+      const usuarioAtual = await usuarios.findByPk(decodificado.id);
 
       if (!usuarioAtual) {
         // Retorna erro caso o usuário não exista mais

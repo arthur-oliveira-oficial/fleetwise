@@ -1,6 +1,6 @@
 // Script para criar usuário administrador
-// Importa o modelo Usuario
-const Usuario = require("../src/models/Usuario");
+// Importa o modelo usuarios
+const usuarios = require("../src/models/usuarios");
 // Importa a configuração do banco de dados (sequelize)
 const sequelize = require("../src/config/database");
 
@@ -12,7 +12,7 @@ async function criarAdmin() {
     // Sincroniza os modelos com o banco de dados
     await sequelize.sync();
     // Cria o usuário administrador com os dados definidos
-    const usuario = await Usuario.create({
+    const usuario = await usuarios.create({
       nome: "administrador",
       email: "administrador@teste.com",
       senha_hash: "senha12345", // Em produção, utilize hash seguro

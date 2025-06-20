@@ -2,7 +2,7 @@
 const sequelize = require("../config/database");
 
 // Importação de modelos
-const Usuario = require("./Usuario"); // Modelo de usuário do sistema
+const usuarios = require("./usuarios"); // Modelo de usuário do sistema
 
 // Definir relações entre modelos
 // Adicione novas relações conforme necessário
@@ -22,6 +22,6 @@ const syncModels = async () => {
 // Exporta os modelos e a função de sincronização para uso em outras partes da aplicação
 module.exports = {
   sequelize,
-  Usuario,
+  usuarios,
   syncModels,
 };
