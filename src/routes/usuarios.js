@@ -11,10 +11,10 @@ const router = express.Router();
 
 /**
  * @swagger
- * /usuario/cadastro:
+ * /usuarios/cadastro:
  *   post:
  *     summary: Realiza o cadastro de um novo usuário
- *     tags: [Usuário]
+ *     tags: [Usuários]
  *     requestBody:
  *       required: true
  *       content:
@@ -41,10 +41,10 @@ router.post("/cadastro", registrar);
 
 /**
  * @swagger
- * /usuario/perfil:
+ * /usuarios/perfil:
  *   get:
  *     summary: Retorna os dados do usuário autenticado
- *     tags: [Usuário]
+ *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
  *     responses:
@@ -57,10 +57,10 @@ router.get("/perfil", proteger, obterUsuarioAtual);
 
 /**
  * @swagger
- * /usuario/atualizar:
+ * /usuarios/atualizar:
  *   put:
  *     summary: Atualiza informações do usuário autenticado (nome, email, tipo e/ou senha)
- *     tags: [Usuário]
+ *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -97,10 +97,10 @@ router.put("/atualizar", proteger, atualizarCadastro);
 
 /**
  * @swagger
- * /usuario/excluir:
+ * /usuarios/excluir:
  *   delete:
  *     summary: Exclui (desativa) o usuário autenticado
- *     tags: [Usuário]
+ *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
  *     responses:
