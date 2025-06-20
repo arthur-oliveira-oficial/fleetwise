@@ -20,30 +20,35 @@ const JWT_TEMPO_EXPIRACAO = process.env.JWT_EXPIRES_IN || "24h";
  */
 exports.login = async (req, res) => {
   const bcrypt = require("bcrypt");
-  const jwt = require("jsonwebtoken");
-  const usuarios = require("../../models/usuarios");
 
   try {
     const { email, senha } = req.body;
 
     if (!email || !senha) {
-      return res
-        .status(400)
-        .json({ mensagem: "Email e senha são obrigatórios." });
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Email e senha são obrigatórios.",
+      });
     }
 
     // Busca usuário ativo pelo email
     const usuario = await usuarios.findOne({ where: { email, ativo: true } });
 
     if (!usuario) {
-      return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
+      return res.status(401).json({
+        sucesso: false,
+        mensagem: "Usuário ou senha inválidos.",
+      });
     }
 
     // Compara senha informada com hash armazenado
     const senhaValida = await bcrypt.compare(senha, usuario.senha_hash);
 
     if (!senhaValida) {
-      return res.status(401).json({ mensagem: "Usuário ou senha inválidos." });
+      return res.status(401).json({
+        sucesso: false,
+        mensagem: "Usuário ou senha inválidos.",
+      });
     } // Atualiza o campo ultimo_login
     usuario.ultimo_login = new Date();
     await usuario.save();
@@ -53,22 +58,28 @@ exports.login = async (req, res) => {
       id: usuario.id,
       nome: usuario.nome,
       email: usuario.email,
+      tipo: usuario.tipo, // Inclui tipo para autorização
     };
 
     // Gera token JWT
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: process.env.JWT_EXPIRES_IN,
+    const token = jwt.sign(payload, SEGREDO_JWT, {
+      expiresIn: JWT_TEMPO_EXPIRACAO,
     });
 
     // Remove o campo senha_hash do retorno
     const { senha_hash, ...usuarioSemSenha } = usuario.toJSON();
 
     return res.json({
+      sucesso: true,
+      mensagem: "Login realizado com sucesso.",
       usuario: usuarioSemSenha,
       token,
     });
   } catch (erro) {
     console.error("Erro no login:", erro);
-    return res.status(500).json({ mensagem: "Erro interno no servidor." });
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno no servidor.",
+    });
   }
 };

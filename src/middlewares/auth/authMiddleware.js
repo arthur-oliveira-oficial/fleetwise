@@ -91,8 +91,8 @@ exports.proteger = async (req, res, next) => {
  */
 exports.autorizar = (...funcoes) => {
   return (req, res, next) => {
-    // Verifica se a função do usuário está entre as permitidas
-    if (!funcoes.includes(req.user.funcao)) {
+    // Verifica se o tipo do usuário está entre os permitidos
+    if (!funcoes.includes(req.user.tipo)) {
       return res.status(403).json({
         sucesso: false,
         mensagem: "Você não tem permissão para acessar este recurso",
