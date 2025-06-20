@@ -37,9 +37,9 @@ const usuarios = sequelize.define(
     tipo: {
       type: DataTypes.STRING(20),
       allowNull: false,
-      defaultValue: "usuario",
+      defaultValue: "motorista",
       validate: {
-        isIn: [["admin", "usuario"]],
+        isIn: [["admin", "gestor", "motorista"]],
       },
     },
     // Indica se o usuário está ativo
