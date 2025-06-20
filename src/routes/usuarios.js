@@ -12,10 +12,181 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Usuários
+ *     description: Gerenciamento de usuários do sistema
+ */
+
+/**
+ * @swagger
  * /usuarios:
  *   post:
  *     summary: Realiza o cadastro de um novo usuário
  *     tags: [Usuários]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nome
+ *               - email
+ *               - senha
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               senha:
+ *                 type: string
+ *               tipo:
+ *                 type: string
+ *                 enum: [admin, gestor, motorista]
+ *                 description: "Tipo do usuário (admin, gestor ou motorista)"
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 mensagem:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
+ *                     ativo:
+ *                       type: boolean
+ *                     criado_em:
+ *                       type: string
+ *                       format: date-time
+ *                     atualizado_em:
+ *                       type: string
+ *                       format: date-time
+ *       400:
+ *         description: Dados inválidos ou usuário já existe
+ */
+
+/**
+ * @swagger
+ * /usuarios:
+ *   get:
+ *     summary: Retorna a lista de usuários
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuários retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 usuarios:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nome:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       tipo:
+ *                         type: string
+ *                       ativo:
+ *                         type: boolean
+ *                       criado_em:
+ *                         type: string
+ *                         format: date-time
+ *                       atualizado_em:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ */
+
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   get:
+ *     summary: Retorna os dados de um usuário específico
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser buscado
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Dados do usuário retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
+ *                     ativo:
+ *                       type: boolean
+ *                     criado_em:
+ *                       type: string
+ *                       format: date-time
+ *                     atualizado_em:
+ *                       type: string
+ *                       format: date-time
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   put:
+ *     summary: Atualiza as informações de um usuário específico
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser atualizado
+ *         schema:
+ *           type: integer
  *     requestBody:
  *       required: true
  *       content:
@@ -27,16 +198,83 @@ const router = express.Router();
  *                 type: string
  *               email:
  *                 type: string
- *               senha:
- *                 type: string
  *               tipo:
  *                 type: string
- *                 description: "Tipo do usuário (ex: 'admin', 'usuario')"
+ *                 enum: [admin, gestor, motorista]
+ *                 description: "Tipo do usuário (admin, gestor ou motorista)"
+ *               senha:
+ *                 type: string
+ *                 description: Nova senha (opcional)
  *     responses:
- *       201:
- *         description: Usuário cadastrado com sucesso
+ *       200:
+ *         description: Cadastro atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 mensagem:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
+ *                     ativo:
+ *                       type: boolean
+ *                     criado_em:
+ *                       type: string
+ *                       format: date-time
+ *                     atualizado_em:
+ *                       type: string
+ *                       format: date-time
  *       400:
- *         description: Dados inválidos ou usuário já existe
+ *         description: Dados inválidos
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   delete:
+ *     summary: Exclui (desativa) um usuário específico
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser excluído
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Usuário excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 mensagem:
+ *                   type: string
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
  */
 router.post("/", criar);
 
@@ -51,6 +289,34 @@ router.post("/", criar);
  *     responses:
  *       200:
  *         description: Lista de usuários retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 usuarios:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       nome:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       tipo:
+ *                         type: string
+ *                       ativo:
+ *                         type: boolean
+ *                       criado_em:
+ *                         type: string
+ *                         format: date-time
+ *                       atualizado_em:
+ *                         type: string
+ *                         format: date-time
  *       401:
  *         description: Token de autenticação ausente ou inválido
  */
@@ -70,10 +336,36 @@ router.get("/", proteger, listar);
  *         required: true
  *         description: ID do usuário a ser buscado
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Dados do usuário retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
+ *                     ativo:
+ *                       type: boolean
+ *                     criado_em:
+ *                       type: string
+ *                       format: date-time
+ *                     atualizado_em:
+ *                       type: string
+ *                       format: date-time
  *       401:
  *         description: Token de autenticação ausente ou inválido
  *       404:
@@ -95,7 +387,7 @@ router.get("/:id", proteger, buscarPorId);
  *         required: true
  *         description: ID do usuário a ser atualizado
  *         schema:
- *           type: string
+ *           type: integer
  *     requestBody:
  *       required: true
  *       content:
@@ -109,18 +401,44 @@ router.get("/:id", proteger, buscarPorId);
  *                 type: string
  *               tipo:
  *                 type: string
- *                 description: "Tipo do usuário (ex: 'admin', 'usuario')"
- *               senhaAtual:
+ *                 enum: [admin, gestor, motorista]
+ *                 description: "Tipo do usuário (admin, gestor ou motorista)"
+ *               senha:
  *                 type: string
- *                 description: Senha atual do usuário (obrigatória para alteração de senha)
- *               novaSenha:
- *                 type: string
- *                 description: Nova senha desejada
+ *                 description: Nova senha (opcional)
  *     responses:
  *       200:
  *         description: Cadastro atualizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 mensagem:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
+ *                     ativo:
+ *                       type: boolean
+ *                     criado_em:
+ *                       type: string
+ *                       format: date-time
+ *                     atualizado_em:
+ *                       type: string
+ *                       format: date-time
  *       400:
- *         description: Dados inválidos ou senha atual incorreta
+ *         description: Dados inválidos
  *       401:
  *         description: Token de autenticação ausente ou inválido
  *       404:
@@ -142,10 +460,19 @@ router.put("/:id", proteger, atualizar);
  *         required: true
  *         description: ID do usuário a ser excluído
  *         schema:
- *           type: string
+ *           type: integer
  *     responses:
  *       200:
  *         description: Usuário excluído com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 mensagem:
+ *                   type: string
  *       401:
  *         description: Token de autenticação ausente ou inválido
  *       404:
