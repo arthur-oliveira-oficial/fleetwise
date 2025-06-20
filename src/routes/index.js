@@ -5,10 +5,12 @@ const router = express.Router();
 // Importação das rotas
 const authRoutes = require("./auth");
 const usuarioRoutes = require("./usuarios"); // Alterado para './usuarios'
+const veiculosRoutes = require("./veiculos"); // Adiciona as rotas de veículos
 
 // Definição das rotas
 router.use("/", authRoutes); // Alterado de "/auth" para "/" para que o login fique em /login
 router.use("/usuarios", usuarioRoutes); // Alterado para '/usuarios'
+router.use("/veiculos", veiculosRoutes); // Adiciona a rota de veículos
 
 /**
  * @openapi
