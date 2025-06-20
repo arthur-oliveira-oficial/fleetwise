@@ -1,28 +1,34 @@
 const { usuarios } = require("../../models");
 const { Op } = require("sequelize");
 
-// Registrar um novo usuário
-exports.registrar = async (req, res) => {
+// Criar novo usuário
+exports.criar = async (req, res) => {
   try {
-    const { nomeUsuario, email, senha, nomeCompleto, funcao } = req.body;
+    const { nome, email, senha, tipo } = req.body;
+
+    if (!nome || !email || !senha) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Nome, email e senha são obrigatórios.",
+      });
+    }
+
     const usuarioExistente = await usuarios.findOne({
-      where: {
-        [Op.or]: [{ nome: nomeUsuario }, { email }],
-      },
+      where: { email },
     });
 
     if (usuarioExistente) {
       return res.status(400).json({
         sucesso: false,
-        mensagem: "Usuário ou email já cadastrado",
+        mensagem: "Email já cadastrado.",
       });
     }
+
     const novoUsuario = await usuarios.create({
-      nome: nomeUsuario,
+      nome,
       email,
       senha_hash: senha,
-      nomeCompleto,
-      funcao: funcao || "usuario",
+      tipo: tipo || "motorista",
     });
 
     const respostaUsuario = novoUsuario.toJSON();
@@ -30,76 +36,73 @@ exports.registrar = async (req, res) => {
 
     res.status(201).json({
       sucesso: true,
-      mensagem: "Usuário registrado com sucesso",
+      mensagem: "Usuário criado com sucesso.",
       usuario: respostaUsuario,
     });
   } catch (erro) {
     res.status(500).json({
       sucesso: false,
-      mensagem: "Erro ao registrar usuário",
+      mensagem: "Erro ao criar usuário.",
       erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };
 
-// Obter informações do usuário atual
-exports.obterUsuarioAtual = async (req, res) => {
+// Listar todos os usuários
+exports.listar = async (req, res) => {
   try {
-    const usuario = await usuarios.findByPk(req.user.id, {
+    const lista = await usuarios.findAll({
       attributes: { exclude: ["senha_hash"] },
     });
-
-    if (!usuario) {
-      return res.status(404).json({
-        sucesso: false,
-        mensagem: "Usuário não encontrado",
-      });
-    }
-
-    res.status(200).json({
-      sucesso: true,
-      usuario,
-    });
+    res.json({ sucesso: true, usuarios: lista });
   } catch (erro) {
     res.status(500).json({
       sucesso: false,
-      mensagem: "Erro no servidor",
+      mensagem: "Erro ao listar usuários.",
       erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };
 
-// Atualizar informações do usuário autenticado
-exports.atualizarCadastro = async (req, res) => {
+// Buscar usuário por ID
+exports.buscarPorId = async (req, res) => {
   try {
-    const { nome, email, funcao, senhaAtual, novaSenha } = req.body;
-    const usuario = await usuarios.findByPk(req.user.id);
+    const usuario = await usuarios.findByPk(req.params.id, {
+      attributes: { exclude: ["senha_hash"] },
+    });
+    if (!usuario) {
+      return res.status(404).json({
+        sucesso: false,
+        mensagem: "Usuário não encontrado.",
+      });
+    }
+    res.json({ sucesso: true, usuario });
+  } catch (erro) {
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao buscar usuário.",
+      erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
+    });
+  }
+};
+
+// Atualizar usuário
+exports.atualizar = async (req, res) => {
+  try {
+    const { nome, email, tipo, senha } = req.body;
+    const usuario = await usuarios.findByPk(req.params.id);
 
     if (!usuario) {
       return res.status(404).json({
         sucesso: false,
-        mensagem: "Usuário não encontrado",
+        mensagem: "Usuário não encontrado.",
       });
     }
 
     if (nome) usuario.nome = nome;
     if (email) usuario.email = email;
-    if (funcao) usuario.funcao = funcao;
-
-    if (senhaAtual || novaSenha) {
-      if (!senhaAtual || !novaSenha) {
-        return res.status(400).json({
-          sucesso: false,
-          mensagem: "Para alterar a senha, envie senhaAtual e novaSenha.",
-        });
-      }
-      if (!(await usuario.verificarSenha(senhaAtual))) {
-        return res
-          .status(400)
-          .json({ sucesso: false, mensagem: "Senha atual incorreta" });
-      }
-      usuario.senha_hash = novaSenha;
-    }
+    if (tipo) usuario.tipo = tipo;
+    if (senha) usuario.senha_hash = senha;
 
     usuario.atualizado_em = new Date();
     await usuario.save();
@@ -108,27 +111,27 @@ exports.atualizarCadastro = async (req, res) => {
 
     res.json({
       sucesso: true,
-      mensagem: "Cadastro atualizado com sucesso",
+      mensagem: "Usuário atualizado com sucesso.",
       usuario: usuarioSemSenha,
     });
   } catch (erro) {
     res.status(500).json({
       sucesso: false,
-      mensagem: "Erro ao atualizar cadastro",
+      mensagem: "Erro ao atualizar usuário.",
       erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
 };
 
-// Excluir (desativar) o usuário autenticado
-exports.excluirUsuario = async (req, res) => {
+// Excluir (desativar) usuário
+exports.excluir = async (req, res) => {
   try {
-    const usuario = await usuarios.findByPk(req.user.id);
+    const usuario = await usuarios.findByPk(req.params.id);
 
     if (!usuario) {
       return res.status(404).json({
         sucesso: false,
-        mensagem: "Usuário não encontrado",
+        mensagem: "Usuário não encontrado.",
       });
     }
 
@@ -138,12 +141,12 @@ exports.excluirUsuario = async (req, res) => {
 
     res.json({
       sucesso: true,
-      mensagem: "Usuário excluído com sucesso",
+      mensagem: "Usuário desativado com sucesso.",
     });
   } catch (erro) {
     res.status(500).json({
       sucesso: false,
-      mensagem: "Erro ao excluir usuário",
+      mensagem: "Erro ao desativar usuário.",
       erro: process.env.NODE_ENV === "development" ? erro.message : undefined,
     });
   }
