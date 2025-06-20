@@ -4,7 +4,7 @@ const {
   obterUsuarioAtual,
   atualizarCadastro, // Mantido apenas este para unificar a atualização
   excluirUsuario, // Adicionado para exclusão
-} = require("../controllers/auth/authController");
+} = require("../controllers/usuarios/usuariosController"); // Corrigido para usar o usuariosController
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
 const router = express.Router();
