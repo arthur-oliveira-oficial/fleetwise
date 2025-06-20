@@ -1,17 +1,18 @@
 const express = require("express");
 const {
-  registrar,
-  obterUsuarioAtual,
-  atualizarCadastro, // Mantido apenas este para unificar a atualização
-  excluirUsuario, // Adicionado para exclusão
-} = require("../controllers/usuarios/usuariosController"); // Corrigido para usar o usuariosController
+  criar,
+  listar,
+  buscarPorId,
+  atualizar,
+  excluir,
+} = require("../controllers/usuarios/usuariosController");
 const { proteger } = require("../middlewares/auth/authMiddleware");
 
 const router = express.Router();
 
 /**
  * @swagger
- * /usuarios/cadastro:
+ * /usuarios:
  *   post:
  *     summary: Realiza o cadastro de um novo usuário
  *     tags: [Usuários]
@@ -37,32 +38,64 @@ const router = express.Router();
  *       400:
  *         description: Dados inválidos ou usuário já existe
  */
-router.post("/cadastro", registrar);
+router.post("/", criar);
 
 /**
  * @swagger
- * /usuarios/perfil:
+ * /usuarios:
  *   get:
- *     summary: Retorna os dados do usuário autenticado
+ *     summary: Retorna a lista de usuários
  *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Dados do usuário retornados com sucesso
+ *         description: Lista de usuários retornada com sucesso
  *       401:
  *         description: Token de autenticação ausente ou inválido
  */
-router.get("/perfil", proteger, obterUsuarioAtual);
+router.get("/", proteger, listar);
 
 /**
  * @swagger
- * /usuarios/atualizar:
- *   put:
- *     summary: Atualiza informações do usuário autenticado (nome, email, tipo e/ou senha)
+ * /usuarios/{id}:
+ *   get:
+ *     summary: Retorna os dados de um usuário específico
  *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser buscado
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Dados do usuário retornados com sucesso
+ *       401:
+ *         description: Token de autenticação ausente ou inválido
+ *       404:
+ *         description: Usuário não encontrado
+ */
+router.get("/:id", proteger, buscarPorId);
+
+/**
+ * @swagger
+ * /usuarios/{id}:
+ *   put:
+ *     summary: Atualiza as informações de um usuário específico
+ *     tags: [Usuários]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser atualizado
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
@@ -93,16 +126,23 @@ router.get("/perfil", proteger, obterUsuarioAtual);
  *       404:
  *         description: Usuário não encontrado
  */
-router.put("/atualizar", proteger, atualizarCadastro);
+router.put("/:id", proteger, atualizar);
 
 /**
  * @swagger
- * /usuarios/excluir:
+ * /usuarios/{id}:
  *   delete:
- *     summary: Exclui (desativa) o usuário autenticado
+ *     summary: Exclui (desativa) um usuário específico
  *     tags: [Usuários]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID do usuário a ser excluído
+ *         schema:
+ *           type: string
  *     responses:
  *       200:
  *         description: Usuário excluído com sucesso
@@ -111,6 +151,6 @@ router.put("/atualizar", proteger, atualizarCadastro);
  *       404:
  *         description: Usuário não encontrado
  */
-router.delete("/excluir", proteger, excluirUsuario);
+router.delete("/:id", proteger, excluir);
 
 module.exports = router;
