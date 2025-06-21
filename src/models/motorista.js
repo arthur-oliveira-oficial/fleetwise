@@ -4,7 +4,7 @@ const sequelize = require("../config/database");
 const Motorista = sequelize.define(
   "motoristas",
   {
-    id_motorista: {
+    id: {
       type: DataTypes.BIGINT,
       autoIncrement: true,
       primaryKey: true,
