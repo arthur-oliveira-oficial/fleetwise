@@ -22,12 +22,11 @@ exports.criar = async (req, res) => {
         sucesso: false,
         mensagem: "Email já cadastrado.",
       });
-    }
-
+    } // Cria o usuário passando a senha para o modelo
     const novoUsuario = await usuarios.create({
       nome,
       email,
-      senha_hash: senha,
+      senha: senha, // O modelo tratará isso internamente
       tipo: tipo || "motorista",
     });
 
@@ -98,11 +97,11 @@ exports.atualizar = async (req, res) => {
         mensagem: "Usuário não encontrado.",
       });
     }
-
     if (nome) usuario.nome = nome;
     if (email) usuario.email = email;
     if (tipo) usuario.tipo = tipo;
-    if (senha) usuario.senha_hash = senha;
+    // Passa a senha para o modelo
+    if (senha) usuario.senha = senha; // O modelo tratará isso internamente
 
     usuario.atualizado_em = new Date();
     await usuario.save();

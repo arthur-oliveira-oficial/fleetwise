@@ -14,6 +14,14 @@ const usuarios = sequelize.define(
       primaryKey: true,
       allowNull: false,
     },
+    // Campo virtual para senha (não persistido no banco)
+    senha: {
+      type: DataTypes.VIRTUAL,
+      set(value) {
+        // Quando a senha é definida, armazenamos no campo senha_hash
+        this.setDataValue("senha_hash", value);
+      },
+    },
     // Nome do usuário
     nome: {
       type: DataTypes.STRING(100),

@@ -69,6 +69,9 @@ app.get("/", (req, res) => {
   res.send("FleetWise API está funcionando!");
 });
 
+// Aplica o limiter geral para todas as rotas que começam com /api
+app.use("/api", apiLimiter);
+
 // Importa e usa as rotas da aplicação (pasta src/routes)
 const routes = require("./src/routes");
 app.use("/api", routes);
@@ -94,13 +97,6 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === "development" ? err : undefined,
   });
 });
-
-// Aplica o limiter geral para todas as rotas que começam com /api
-app.use("/api", apiLimiter);
-
-// Aplica o limiter de login apenas para POST /api/login
-const authRoutes = require("./src/routes/auth");
-app.post("/api/login", loginLimiter, authRoutes);
 
 // Inicialização do servidor Express
 app.listen(PORT, () => {
