@@ -348,7 +348,7 @@ router.post("/", proteger, autorizar("admin"), validarUsuarioCriacao, criar);
  *       401:
  *         description: Token de autenticação ausente ou inválido
  */
-router.get("/", proteger, listar);
+router.get("/", proteger, autorizar("admin"), listar);
 
 /**
  * @swagger
@@ -399,7 +399,7 @@ router.get("/", proteger, listar);
  *       404:
  *         description: Usuário não encontrado
  */
-router.get("/:id", proteger, buscarPorId);
+router.get("/:id", proteger, autorizar("admin"), buscarPorId);
 
 /**
  * @swagger
@@ -472,7 +472,7 @@ router.get("/:id", proteger, buscarPorId);
  *       404:
  *         description: Usuário não encontrado
  */
-router.put("/:id", proteger, atualizar);
+router.put("/:id", proteger, autorizar("admin"), atualizar);
 
 /**
  * @swagger
@@ -506,6 +506,6 @@ router.put("/:id", proteger, atualizar);
  *       404:
  *         description: Usuário não encontrado
  */
-router.delete("/:id", proteger, excluir);
+router.delete("/:id", proteger, autorizar("admin"), excluir);
 
 module.exports = router;
