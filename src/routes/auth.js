@@ -57,16 +57,7 @@ const loginLimiter = rateLimit({
  *                 token:
  *                   type: string
  *                 usuario:
- *                   type: object
- *                   properties:
- *                     id:
- *                       type: integer
- *                     nome:
- *                       type: string
- *                     email:
- *                       type: string
- *                     tipo:
- *                       type: string
+ *                   $ref: '#/components/schemas/Usuario'
  *       401:
  *         description: Credenciais inválidas
  *       429:
