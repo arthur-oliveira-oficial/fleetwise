@@ -1,5 +1,5 @@
 const express = require("express");
-const { body, validationResult } = require("express-validator");
+const { body } = require("express-validator");
 const {
   criar,
   listar,
@@ -8,23 +8,9 @@ const {
   excluir,
 } = require("../controllers/usuarios/usuariosController");
 const { proteger, autorizar } = require("../middlewares/auth/authMiddleware");
+const { validarErros } = require("../middlewares/validationMiddleware");
 
 const router = express.Router();
-
-/**
- * Middleware para tratamento de erros de validação
- */
-const validarErros = (req, res, next) => {
-  const erros = validationResult(req);
-  if (!erros.isEmpty()) {
-    return res.status(400).json({
-      sucesso: false,
-      mensagem: "Erro de validação.",
-      erros: erros.array(),
-    });
-  }
-  next();
-};
 
 /**
  * Middleware de validação para criação de usuário
