@@ -19,6 +19,13 @@ const loginLimiter = rateLimit({
 
 /**
  * @swagger
+ * tags:
+ *   - name: Autenticação
+ *     description: Autenticação de usuários no sistema
+ */
+
+/**
+ * @swagger
  * /login:
  *   post:
  *     summary: Realiza login do usuário
@@ -29,6 +36,9 @@ const loginLimiter = rateLimit({
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - email
+ *               - senha
  *             properties:
  *               email:
  *                 type: string
@@ -37,8 +47,30 @@ const loginLimiter = rateLimit({
  *     responses:
  *       200:
  *         description: Login realizado com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucesso:
+ *                   type: boolean
+ *                 token:
+ *                   type: string
+ *                 usuario:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     nome:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     tipo:
+ *                       type: string
  *       401:
  *         description: Credenciais inválidas
+ *       429:
+ *         description: Muitas tentativas de login, tente novamente mais tarde
  */
 router.post("/login", loginLimiter, login);
 

@@ -13,7 +13,14 @@ router.use("/usuarios", usuarioRoutes); // Alterado para '/usuarios'
 router.use("/veiculos", veiculosRoutes); // Adiciona a rota de veículos
 
 /**
- * @openapi
+ * @swagger
+ * tags:
+ *   - name: Status
+ *     description: Informações sobre o status da API
+ */
+
+/**
+ * @swagger
  * /status:
  *   get:
  *     summary: Verifica o status da API
