@@ -40,6 +40,9 @@ const router = express.Router();
  *         atualizado_em:
  *           type: string
  *           format: date-time
+ *         ultimo_login:
+ *           type: string
+ *           format: date-time
  */
 
 /**
