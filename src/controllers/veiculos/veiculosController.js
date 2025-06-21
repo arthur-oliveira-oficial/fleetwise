@@ -5,13 +5,6 @@ exports.criar = async (req, res) => {
   try {
     const { placa, chassi, marca, modelo, ano, cor, tipo, status } = req.body;
 
-    if (!placa || !chassi || !marca || !modelo || !ano || !cor || !tipo) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Todos os campos obrigatórios devem ser preenchidos.",
-      });
-    }
-
     // Verifica se já existe veículo com a mesma placa ou chassi
     const veiculoExistente = await veiculos.findOne({
       where: { placa },
