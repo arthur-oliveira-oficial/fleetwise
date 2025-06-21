@@ -4,6 +4,7 @@ const sequelize = require("../config/database");
 // Importação de modelos
 const usuarios = require("./usuarios"); // Modelo de usuário do sistema
 const veiculos = require("./veiculos"); // Modelo de veículo do sistema
+const motoristas = require("./motorista"); // Modelo de motorista do sistema
 
 // Definir relações entre modelos
 // Adicione novas relações conforme necessário
@@ -25,5 +26,6 @@ module.exports = {
   sequelize,
   usuarios,
   veiculos, // Exporta o modelo de veículos
+  motoristas, // Exporta o modelo de motoristas
   syncModels,
 };
