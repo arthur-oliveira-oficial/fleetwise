@@ -1,4 +1,5 @@
 const express = require("express");
+const { body, validationResult } = require("express-validator");
 const {
   criar,
   listar,
@@ -74,7 +75,7 @@ const router = express.Router();
  *       400:
  *         description: Dados inválidos ou veículo já existe
  */
-router.post("/", proteger, criar);
+router.post("/", proteger, validarVeiculoCriacao, criar);
 
 /**
  * @swagger
@@ -266,3 +267,48 @@ router.delete("/:id", proteger, excluir);
  */
 
 module.exports = router;
+
+/**
+ * Middleware para tratamento de erros de validação
+ */
+const validarErros = (req, res, next) => {
+  const erros = validationResult(req);
+  if (!erros.isEmpty()) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Erro de validação.",
+      erros: erros.array(),
+    });
+  }
+  next();
+};
+
+/**
+ * Middleware de validação para criação de veículo
+ */
+const validarVeiculoCriacao = [
+  body("placa")
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("A placa é obrigatória."),
+  body("chassi")
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("O chassi é obrigatório."),
+  body("marca")
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("A marca é obrigatória."),
+  body("modelo")
+    .trim()
+    .escape()
+    .notEmpty()
+    .withMessage("O modelo é obrigatório."),
+  body("ano").isInt().withMessage("O ano deve ser um número inteiro."),
+  body("cor").trim().escape().notEmpty().withMessage("A cor é obrigatória."),
+  body("tipo").trim().escape().notEmpty().withMessage("O tipo é obrigatório."),
+  validarErros,
+];

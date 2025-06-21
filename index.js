@@ -4,6 +4,10 @@ require("dotenv").config();
 
 // Importa o framework Express
 const express = require("express");
+// Importa o Helmet para segurança HTTP
+const helmet = require("helmet");
+// Importa o express-rate-limit para limitação de requisições
+const rateLimit = require("express-rate-limit");
 
 // Importa o Sequelize e função para sincronizar modelos
 const { sequelize, syncModels } = require("./src/models");
@@ -14,12 +18,39 @@ const swaggerSpec = require("./src/config/swagger");
 
 // Inicializa a aplicação Express
 const app = express();
+// Aplica o Helmet como um dos primeiros middlewares
+app.use(helmet());
 // Define a porta do servidor (padrão 3000 se não houver variável de ambiente)
 const PORT = process.env.PORT || 3000;
 
 // Middleware para parsing de JSON e dados de formulários
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Limiter geral para todas as rotas /api (100 requisições por 15 minutos por IP)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // Limite de 100 requisições
+  message: {
+    sucesso: false,
+    mensagem: "Muitas requisições deste IP, tente novamente mais tarde.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Limiter específico para login (5 requisições por 10 minutos por IP)
+const loginLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutos
+  max: 5, // Limite de 5 tentativas
+  message: {
+    sucesso: false,
+    mensagem:
+      "Muitas tentativas de login deste IP. Tente novamente em alguns minutos.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Teste de conexão com o banco de dados e sincronização de modelos
 sequelize
@@ -63,6 +94,13 @@ app.use((err, req, res, next) => {
     error: process.env.NODE_ENV === "development" ? err : undefined,
   });
 });
+
+// Aplica o limiter geral para todas as rotas que começam com /api
+app.use("/api", apiLimiter);
+
+// Aplica o limiter de login apenas para POST /api/login
+const authRoutes = require("./src/routes/auth");
+app.post("/api/login", loginLimiter, authRoutes);
 
 // Inicialização do servidor Express
 app.listen(PORT, () => {

@@ -1,4 +1,5 @@
 const express = require("express");
+const { body, validationResult } = require("express-validator");
 const {
   criar,
   listar,
@@ -6,9 +7,36 @@ const {
   atualizar,
   excluir,
 } = require("../controllers/usuarios/usuariosController");
-const { proteger } = require("../middlewares/auth/authMiddleware");
+const { proteger, autorizar } = require("../middlewares/auth/authMiddleware");
 
 const router = express.Router();
+
+/**
+ * Middleware para tratamento de erros de validação
+ */
+const validarErros = (req, res, next) => {
+  const erros = validationResult(req);
+  if (!erros.isEmpty()) {
+    return res.status(400).json({
+      sucesso: false,
+      mensagem: "Erro de validação.",
+      erros: erros.array(),
+    });
+  }
+  next();
+};
+
+/**
+ * Middleware de validação para criação de usuário
+ */
+const validarUsuarioCriacao = [
+  body("nome").trim().escape().notEmpty().withMessage("O nome é obrigatório."),
+  body("email").normalizeEmail().isEmail().withMessage("Email inválido."),
+  body("senha")
+    .isLength({ min: 8 })
+    .withMessage("A senha deve ter no mínimo 8 caracteres."),
+  validarErros,
+];
 
 /**
  * @swagger
@@ -276,7 +304,7 @@ const router = express.Router();
  *       404:
  *         description: Usuário não encontrado
  */
-router.post("/", criar);
+router.post("/", proteger, autorizar("admin"), validarUsuarioCriacao, criar);
 
 /**
  * @swagger
