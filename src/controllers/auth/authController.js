@@ -19,7 +19,7 @@ const JWT_TEMPO_EXPIRACAO = process.env.JWT_EXPIRES_IN || "24h";
  * Verifica email e senha, gera token JWT e retorna dados do usuário (sem senha).
  */
 exports.login = async (req, res) => {
-  const bcrypt = require("bcrypt");
+  const bcrypt = require("bcryptjs");
 
   try {
     const { email, senha } = req.body;
