@@ -1,79 +1,108 @@
-# FleetWise
 
-Sistema de gerenciamento de frota veicular.
+## Instalação e Configuração
 
-## Estrutura do Projeto
+1.  **Clone o repositório:**
 
-```
-fleetwise/
-├── .env                   # Variáveis de ambiente (não versionado)
-├── .env.example           # Modelo para variáveis de ambiente
-├── index.js               # Ponto de entrada da aplicação
-├── package.json           # Dependências e scripts
-├── tests/                 # Testes da aplicação
-│   └── teste_conexao_bd.js # Teste de conexão com o banco de dados
-├── src/                   # Código fonte da aplicação
-│   ├── config/            # Configurações (banco de dados, etc.)
-│   │   └── database.js    # Configuração do Sequelize
-│   ├── models/            # Modelos do Sequelize
-│   │   ├── index.js       # Arquivo para exportação dos modelos
-│   │   └── Usuario.js     # Modelo de usuário com autenticação
-│   ├── controllers/       # Controladores da aplicação
-│   │   └── auth/          # Controladores de autenticação
-│   │       └── authController.js # Controlador de autenticação
-│   ├── routes/            # Rotas da API
-│   │   ├── auth.js        # Rotas de autenticação
-│   │   └── index.js       # Arquivo principal de rotas
-│   └── middlewares/       # Middlewares da aplicação
-│       └── auth/          # Middlewares de autenticação
-│           └── authMiddleware.js # Middleware para proteção de rotas
-```
+    ```bash
+    git clone <url-do-repositorio>
+    cd fleetwise
+    ```
 
-## Tecnologias Utilizadas
+2.  **Instale as dependências:**
 
-- **Node.js**: Ambiente de execução JavaScript server-side
-- **Express**: Framework web para Node.js
-- **Sequelize**: ORM para Node.js que suporta MySQL e outros bancos de dados
-- **MySQL**: Sistema de gerenciamento de banco de dados relacional
-- **JWT**: JSON Web Tokens para autenticação
-- **bcryptjs**: Biblioteca para criptografia de senhas
+    ```bash
+    npm install
+    ```
 
-## Instalação
+3.  **Configure as Variáveis de Ambiente:**
 
-1. Clone o repositório
-2. Instale as dependências:
-   ```
-   npm install
-   ```
-3. Crie um arquivo `.env` baseado no `.env.example` e configure as variáveis de ambiente:
-   ```
-   PORT=3000
-   DB_HOST=localhost
-   DB_USER=seu_usuario
-   DB_PASSWORD=sua_senha
-   DB_NAME=fleetwise
-   DB_DIALECT=mysql
-   DB_LOGGING=false
-   JWT_SECRET=sua_chave_secreta
-   JWT_EXPIRES_IN=24h
-   ```
-4. Execute o projeto:
-   ```
-   npm run dev
-   ```
+    - Crie um arquivo `.env` na raiz do projeto, utilizando o `.env.example` como modelo.
+    - Preencha as variáveis com as informações do seu ambiente (banco de dados, segredo JWT, etc.).
+    ```env
+    PORT=3000
+    DB_HOST=localhost
+    DB_USER=seu_usuario
+    DB_PASSWORD=sua_senha
+    DB_NAME=fleetwise
+    DB_DIALECT=mysql
+    DB_LOGGING=false
+    JWT_SECRET=sua_chave_secreta_super_segura
+    JWT_EXPIRES_IN=24h
+    ADMIN_PASSWORD=uma_senha_forte_para_o_admin
+    ```
 
-## Scripts
+4.  **Crie o Usuário Administrador:**
 
-- `npm start`: Inicia o servidor em modo produção
-- `npm run dev`: Inicia o servidor com nodemon para desenvolvimento
-- `npm run test:db`: Testa a conexão com o banco de dados
+    - Após configurar o banco de dados no arquivo `.env`, execute o script para criar o primeiro usuário com perfil de `admin`.
 
-## API Endpoints
+    ```bash
+    node scripts/criar_usuario_admin.js
+    ```
 
-### Autenticação
-- **POST /api/auth/register**: Registra um novo usuário
-- **POST /api/auth/login**: Faz login e retorna um token JWT
-- **GET /api/auth/me**: Retorna os dados do usuário autenticado (requer autenticação)
+5.  **Execute a Aplicação:**
+
+    ```bash
+    npm run dev
+    ```
+
+    O servidor estará rodando em `http://localhost:3000`.
+
+## Scripts Disponíveis
+
+  - `npm start`: Inicia o servidor em modo de produção.
+  - `npm run dev`: Inicia o servidor em modo de desenvolvimento com `nodemon`, que reinicia a aplicação automaticamente a cada alteração de arquivo.
+  - `npm run test:db`: Executa um script de teste para verificar a conexão com o banco de dados.
+
+## Endpoints da API
+
+A base da URL para todos os endpoints é `http://localhost:3000/api`.
+
+### Documentação da API (Swagger)
+
+Para uma visualização interativa e detalhada de todos os endpoints, acesse a documentação do Swagger após iniciar o servidor:
+
+  - **GET /api/docs**: Abre a interface do Swagger UI.
 
 ### Status da API
-- **GET /api/status**: Verifica o status da API e o ambiente atual
+
+  - **GET /api/status**: Verifica a saúde da aplicação.
+      - **Resposta:** Retorna o status `online`, o `timestamp` e o ambiente (`development` ou `production`).
+
+### Autenticação
+
+  - **POST /api/login**: Realiza a autenticação de um usuário no sistema.
+      - **Corpo da Requisição:** `email`, `senha`.
+      - **Resposta:** Retorna os dados do usuário e um token JWT em caso de sucesso.
+
+### Usuários
+
+*As rotas de usuários exigem autenticação e autorização de administrador.*
+
+  - **POST /api/usuarios**: Cadastra um novo usuário (perfis: `admin`, `gestor`, `motorista`).
+      - **Corpo da Requisição:** `nome`, `email`, `senha`, `tipo` (opcional, padrão `motorista`).
+  - **GET /api/usuarios**: Lista todos os usuários cadastrados.
+  - **GET /api/usuarios/{id}**: Busca um usuário específico pelo seu ID.
+  - **PUT /api/usuarios/{id}**: Atualiza os dados de um usuário.
+  - **DELETE /api/usuarios/{id}**: Desativa um usuário (exclusão lógica).
+
+### Veículos
+
+*As rotas de veículos exigem autenticação.*
+
+  - **POST /api/veiculos**: Cadastra um novo veículo.
+      - **Corpo da Requisição:** `placa`, `chassi`, `marca`, `modelo`, `ano`, `cor`, `tipo`.
+  - **GET /api/veiculos**: Lista todos os veículos.
+  - **GET /api/veiculos/{id}**: Busca um veículo específico pelo seu ID.
+  - **PUT /api/veiculos/{id}**: Atualiza os dados de um veículo.
+  - **DELETE /api/veiculos/{id}**: Desativa um veículo (exclusão lógica, altera o status para `inativo`).
+
+### Motoristas
+
+*As rotas de motoristas exigem autenticação.*
+
+  - **POST /api/motoristas**: Cadastra um novo motorista.
+      - **Corpo da Requisição:** `nome_completo`, `cpf`, `cnh_numero`, `cnh_data_vencimento`, e outros campos opcionais.
+  - **GET /api/motoristas**: Lista todos os motoristas.
+  - **GET /api/motoristas/{id}**: Busca um motorista específico pelo seu ID.
+  - **PUT /api/motoristas/{id}**: Atualiza os dados de um motorista.
+  - **DELETE /api/motoristas/{id}**: Desativa um motorista (exclusão lógica, altera o status para `Inativo`).
